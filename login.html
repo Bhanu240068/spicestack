@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpiceStack — Sign In & Member Access</title>
+  <style>
+    :root {
+      --green: #174d38;
+      --green-dark: #0f3325;
+      --green-light: #236b4b;
+      --green-soft: #eaf3ed;
+      --gold: #d6ad62;
+      --gold-dark: #b88f44;
+      --gold-light: #fbf5e7;
+      --cream: #f7f5ef;
+      --cream-dark: #ede8dc;
+      --white: #ffffff;
+      --ink: #202820;
+      --muted: #727a72;
+      --line: #e3ded2;
+      --danger: #cf3d3d;
+      --danger-soft: #fdf0f0;
+      --radius: 12px;
+      --shadow: 0 10px 30px rgba(23, 77, 56, 0.08);
+      --shadow-lg: 0 20px 45px rgba(15, 51, 37, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* Container & Layout */
+    .auth-container {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* =========================================
+       LEFT PANEL: Restaurant Showcase & Atmosphere
+       ========================================= */
+    .showcase-panel {
+      background: linear-gradient(145deg, var(--green-dark) 0%, var(--green) 55%, var(--green-light) 100%);
+      color: var(--white);
+      padding: 48px 6%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative ambient pattern */
+    .showcase-panel::before {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 440px;
+      height: 440px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(214, 173, 98, 0.18) 0%, rgba(23, 77, 56, 0) 70%);
+      pointer-events: none;
+    }
+
+    .showcase-panel::after {
+      content: "";
+      position: absolute;
+      bottom: -150px;
+      left: -100px;
+      width: 480px;
+      height: 480px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(242, 209, 140, 0.12) 0%, rgba(23, 77, 56, 0) 70%);
+      pointer-events: none;
+    }
+
+    .brand-header {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-link {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-emblem {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(214, 173, 98, 0.18);
+      border: 1px solid rgba(214, 173, 98, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--gold);
+    }
+
+    .brand-text {
+      font-size: 24px;
+      font-weight: 700;
+      color: #f2d18c;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .brand-text small {
+      display: block;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: normal;
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+
+    .back-btn {
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 9px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: var(--white);
+      transform: translateX(-2px);
+    }
+
+    /* Showcase Center Feature Card */
+    .showcase-content {
+      position: relative;
+      z-index: 2;
+      margin: 40px 0;
+      max-width: 580px;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .showcase-title {
+      font-size: clamp(30px, 3.8vw, 44px);
+      font-weight: 800;
+      line-height: 1.18;
+      margin-bottom: 16px;
+      color: var(--white);
+    }
+
+    .showcase-desc {
+      color: #dfebd9;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Visual culinary highlights card */
+    .culinary-card {
+      background: rgba(16, 51, 37, 0.65);
+      border: 1px solid rgba(214, 173, 98, 0.35);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 20px;
+      animation: cardFloat 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes cardFloat {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-6px); }
+    }
+
+    .culinary-thumb {
+      width: 82px;
+      height: 82px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid rgba(214, 173, 98, 0.4);
+    }
+
+    .culinary-meta h4 {
+      font-size: 16px;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .culinary-meta p {
+      font-size: 12px;
+      color: #c2d6c6;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .culinary-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #f2d18c;
+      background: rgba(214, 173, 98, 0.18);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* Key benefits list */
+    .perks-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .perk-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #e3ede3;
+    }
+
+    .perk-icon {
+      color: var(--gold);
+      font-size: 15px;
+      font-weight: bold;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .showcase-footer {
+      position: relative;
+      z-index: 2;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      color: #b5c7b8;
+    }
+
+    .rating-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #f2d18c;
+      font-weight: bold;
+    }
+
+    /* =========================================
+       RIGHT PANEL: Interactive Authentication Form
+       ========================================= */
+    .form-panel {
+      background: var(--white);
+      padding: 48px 8%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    .auth-wrapper {
+      max-width: 440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Role Switcher (Diner vs Staff) */
+    .role-toggle {
+      background: var(--cream);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 4px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+
+    .role-btn {
+      border: 0;
+      background: transparent;
+      padding: 9px 12px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .role-btn.active {
+      background: var(--white);
+      color: var(--green);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Form Mode Switcher (Sign In vs Sign Up) */
+    .mode-toggle {
+      display: flex;
+      gap: 20px;
+      border-bottom: 2px solid var(--line);
+      margin-bottom: 24px;
+      padding-bottom: 2px;
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: 0;
+      padding: 8px 4px 12px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--muted);
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .mode-btn.active {
+      color: var(--green);
+    }
+
+    .mode-btn.active::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--green);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* Form Header */
+    .form-heading h2 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .form-heading p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    /* Quick Demo Bar */
+    .demo-bar {
+      background: var(--gold-light);
+      border: 1px dashed var(--gold);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .demo-bar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green-dark);
+    }
+
+    .demo-pill-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .demo-chip {
+      background: var(--white);
+      border: 1px solid var(--line);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      transition: all 0.15s ease;
+    }
+
+    .demo-chip:hover {
+      background: var(--green);
+      color: var(--white);
+      border-color: var(--green);
+      transform: translateY(-1px);
+    }
+
+    /* Inputs & Form Elements */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      font-size: 15px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    select {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fdfcf9;
+      color: var(--ink);
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--green);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(23, 77, 56, 0.1);
+    }
+
+    input.error {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .toggle-pass-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 6px;
+    }
+
+    .toggle-pass-btn:hover {
+      color: var(--ink);
+    }
+
+    .error-msg {
+      font-size: 11px;
+      color: var(--danger);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .error-msg.visible {
+      display: block;
+      animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+
+    /* Dietary Preference Selector */
+    .pref-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .pref-btn {
+      border: 1px solid var(--line);
+      background: var(--cream);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      transition: all 0.15s;
+    }
+
+    .pref-btn.selected {
+      background: var(--green);
+      color: var(--white);
+      border-color: var(--green);
+    }
+
+    /* Password Strength Meter */
+    .strength-meter {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+      height: 4px;
+    }
+
+    .strength-bar {
+      flex: 1;
+      border-radius: 2px;
+      background: var(--line);
+      transition: background-color 0.25s;
+    }
+
+    .strength-text {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Helper row */
+    .helper-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0 20px;
+      font-size: 13px;
+    }
+
+    .remember-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--ink);
+      font-size: 13px;
+      text-transform: none;
+      letter-spacing: 0;
+      margin: 0;
+    }
+
+    .remember-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--green);
+      cursor: pointer;
+    }
+
+    .link-btn {
+      background: none;
+      border: 0;
+      color: var(--green2);
+      font-weight: 700;
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .link-btn:hover {
+      text-decoration: underline;
+      color: var(--green);
+    }
+
+    /* Primary Submit Button */
+    .submit-btn {
+      width: 100%;
+      background: var(--green);
+      color: var(--white);
+      border: 0;
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(23, 77, 56, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .submit-btn:hover {
+      background: var(--green-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(23, 77, 56, 0.35);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Social Dividers */
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 22px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .divider span {
+      padding: 0 12px;
+    }
+
+    .social-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .social-btn {
+      border: 1px solid var(--line);
+      background: var(--white);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .social-btn:hover {
+      background: var(--cream);
+      border-color: #d8d3c5;
+    }
+
+    /* Footer Switch Prompt */
+    .form-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .form-footer button {
+      color: var(--green);
+      font-weight: 700;
+      border: 0;
+      background: none;
+      cursor: pointer;
+    }
+
+    .form-footer button:hover {
+      text-decoration: underline;
+    }
+
+    /* =========================================
+       MODAL: Forgot Password
+       ========================================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 51, 37, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--white);
+      border-radius: 18px;
+      max-width: 420px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      animation: modalPop 0.25s ease-out;
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      border: 0;
+      background: var(--cream);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .modal-close:hover {
+      color: var(--ink);
+      background: var(--line);
+    }
+
+    /* =========================================
+       TOAST NOTIFICATION
+       ========================================= */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--ink);
+      color: var(--white);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 200;
+      animation: slideUp 0.3s ease;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    .toast.success {
+      background: var(--green-dark);
+      border-left: 4px solid var(--gold);
+    }
+
+    .toast.error {
+      background: #7a1d1d;
+      border-left: 4px solid #ff7b7b;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 960px) {
+      .auth-container {
+        grid-template-columns: 1fr;
+      }
+      .showcase-panel {
+        padding: 32px 6%;
+      }
+      .form-panel {
+        padding: 40px 6%;
+      }
+      .perks-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .culinary-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .culinary-thumb {
+        width: 100%;
+        height: 120px;
+      }
+      .social-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-container">
+  
+  <!-- ================= LEFT SHOWCASE ================= -->
+  <aside class="showcase-panel">
+    <div class="brand-header">
+      <a href="html2.html" class="brand-link">
+        <div class="brand-emblem">✦</div>
+        <div class="brand-text">
+          SpiceStack
+          <small>DINE · PRE-ORDER · ENJOY</small>
+        </div>
+      </a>
+      <a href="html2.html" class="back-btn">
+        ← Back to Restaurant
+      </a>
+    </div>
+
+    <div class="showcase-content">
+      <div class="eyebrow">TableTurn™ Dining Experience</div>
+      <h1 class="showcase-title">Your reserved table, ready when you arrive.</h1>
+      <p class="showcase-desc">
+        Sign in to manage your table reservations, pre-order from our kitchen, view live KDS cooking status, and split bills effortlessly.
+      </p>
+
+      <!-- Featured Culinary Spotlight -->
+      <div class="culinary-card">
+        <img class="culinary-thumb" src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600" alt="Butter Chicken Specialty">
+        <div class="culinary-meta">
+          <h4>Signature Dining &amp; Timed Pre-Orders</h4>
+          <p>Orders are automatically synchronized with your arrival time to guarantee hot, oven-fresh food upon seating.</p>
+          <span class="culinary-badge">✦ 90-Min Reserved Table · Zero Waiting</span>
+        </div>
+      </div>
+
+      <!-- Perks list -->
+      <div class="perks-grid">
+        <div class="perk-item">
+          <span class="perk-icon">✓</span>
+          <span>Instant Table Reservations (8-top capacity)</span>
+        </div>
+        <div class="perk-item">
+          <span class="perk-icon">✓</span>
+          <span>Kitchen Display (KDS) Live Prep Tracking</span>
+        </div>
+        <div class="perk-item">
+          <span class="perk-icon">✓</span>
+          <span>Fast Bill Splitting &amp; GST Invoicing</span>
+        </div>
+        <div class="perk-item">
+          <span class="perk-icon">✓</span>
+          <span>Google Calendar &amp; SMS QR Pass Sync</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase-footer">
+      <div class="rating-badge">
+        ★★★★★ <span>4.9 / 5 Guest Satisfaction</span>
+      </div>
+      <div>
+        <span>Over 12,000 tables served this year</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= RIGHT AUTHENTICATION FORM ================= -->
+  <main class="form-panel">
+    <div class="auth-wrapper">
+
+      <!-- Role Selector: Diner vs Staff/Kitchen -->
+      <div class="role-toggle" role="tablist">
+        <button type="button" class="role-btn active" id="roleDiner" onclick="setRole('diner')">
+          <span>🍽️ Guest / Diner</span>
+        </button>
+        <button type="button" class="role-btn" id="roleStaff" onclick="setRole('staff')">
+          <span>👨‍🍳 Staff &amp; Operations</span>
+        </button>
+      </div>
+
+      <!-- Mode Selector: Sign In vs Create Account -->
+      <div class="mode-toggle" id="modeToggle">
+        <button type="button" class="mode-btn active" id="tabSignIn" onclick="setMode('signin')">Sign In</button>
+        <button type="button" class="mode-btn" id="tabSignUp" onclick="setMode('signup')">Create Account</button>
+      </div>
+
+      <!-- Form Headings -->
+      <div class="form-heading">
+        <h2 id="formTitle">Welcome back</h2>
+        <p id="formSub">Access your SpiceStack reservations and pre-orders.</p>
+      </div>
+
+      <!-- One-Click Demo Access Bar -->
+      <div class="demo-bar">
+        <div class="demo-bar-top">
+          <span>✦ Fast Demo Access</span>
+          <small style="color:var(--muted)">One-click test accounts</small>
+        </div>
+        <div class="demo-pill-group">
+          <button type="button" class="demo-chip" onclick="quickFill('diner')">👤 Diner Demo</button>
+          <button type="button" class="demo-chip" onclick="quickFill('kitchen')">🔥 Kitchen Cook Demo</button>
+          <button type="button" class="demo-chip" onclick="quickFill('manager')">📊 Manager Demo</button>
+        </div>
+      </div>
+
+      <!-- Main Form -->
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+
+        <!-- Full Name (Only for Sign Up) -->
+        <div class="form-group" id="nameGroup" style="display: none;">
+          <label for="fullName">Full Name</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input type="text" id="fullName" placeholder="e.g. Aarav Sharma">
+          </div>
+          <div class="error-msg" id="nameError">Please enter your full name.</div>
+        </div>
+
+        <!-- Phone Number (Only for Sign Up) -->
+        <div class="form-group" id="phoneGroup" style="display: none;">
+          <label for="phone">Phone Number (for booking SMS)</label>
+          <div class="input-wrapper">
+            <span class="input-icon">📞</span>
+            <input type="tel" id="phone" placeholder="e.g. +91 98765 43210">
+          </div>
+          <div class="error-msg" id="phoneError">Please enter a valid phone number.</div>
+        </div>
+
+        <!-- Email or User Identifier -->
+        <div class="form-group">
+          <label for="email" id="emailLabel">Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon" id="emailIcon">✉️</span>
+            <input type="text" id="email" placeholder="you@example.com" required>
+          </div>
+          <div class="error-msg" id="emailError">Please enter a valid email address.</div>
+        </div>
+
+        <!-- Staff Role Selector (Only for Staff mode) -->
+        <div class="form-group" id="staffRoleGroup" style="display: none;">
+          <label for="staffRoleSelect">Department / Station</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🏢</span>
+            <select id="staffRoleSelect">
+              <option value="kitchen">Kitchen Display System (KDS)</option>
+              <option value="manager">Restaurant Manager &amp; Analytics</option>
+              <option value="floor">Front of House Host</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label for="password" id="passwordLabel">Password</label>
+            <button type="button" class="link-btn" id="forgotLink" onclick="openForgotModal()">Forgot?</button>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" placeholder="••••••••" required>
+            <button type="button" class="toggle-pass-btn" onclick="togglePasswordVisibility()">Show</button>
+          </div>
+          <div class="error-msg" id="passwordError">Password must be at least 6 characters.</div>
+
+          <!-- Strength Meter (Sign Up Only) -->
+          <div id="strengthContainer" style="display:none;">
+            <div class="strength-meter">
+              <div class="strength-bar" id="bar1"></div>
+              <div class="strength-bar" id="bar2"></div>
+              <div class="strength-bar" id="bar3"></div>
+              <div class="strength-bar" id="bar4"></div>
+            </div>
+            <div class="strength-text" id="strengthText">Must contain 6+ characters</div>
+          </div>
+        </div>
+
+        <!-- Dietary Preferences (Sign Up Only) -->
+        <div class="form-group" id="dietaryGroup" style="display: none;">
+          <label>Dietary Preference</label>
+          <div class="pref-group">
+            <button type="button" class="pref-btn selected" onclick="togglePref(this)">🌱 Pure Veg</button>
+            <button type="button" class="pref-btn" onclick="togglePref(this)">🍗 Non-Veg</button>
+            <button type="button" class="pref-btn" onclick="togglePref(this)">🌾 Vegan</button>
+            <button type="button" class="pref-btn" onclick="togglePref(this)">🌶️ Extra Spicy</button>
+          </div>
+        </div>
+
+        <!-- Helper Row (Remember Me) -->
+        <div class="helper-row">
+          <label class="remember-label">
+            <input type="checkbox" id="rememberMe" checked>
+            <span id="rememberLabel">Keep me logged in for 30 days</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span id="submitBtnText">Sign In to SpiceStack</span>
+          <span>→</span>
+        </button>
+
+      </form>
+
+      <!-- Social Login Buttons (Diner Mode Only) -->
+      <div id="socialSection">
+        <div class="divider">
+          <span>or continue with</span>
+        </div>
+        <div class="social-grid">
+          <button type="button" class="social-btn" onclick="handleSocial('Google')">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.5H12v4.8h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/><path fill="#FBBC05" d="M5.3 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.6 7.4C.6 9.4 0 11.6 0 14s.6 4.6 1.6 6.6l3.7-2.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.4 7.4 24 12 24z"/></svg>
+            Google
+          </button>
+          <button type="button" class="social-btn" onclick="handleSocial('Apple')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.93-2.85-.9.04-2 .6-2.65 1.35-.58.67-.99 1.74-.88 2.76 1.01.08 2-.51 2.6-1.26z"/></svg>
+            Apple
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer switch prompt -->
+      <div class="form-footer">
+        <span id="footerPromptText">Don't have an account yet?</span>
+        <button type="button" id="footerPromptBtn" onclick="toggleAuthMode()">Create an account</button>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- ================= MODAL: FORGOT PASSWORD ================= -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal-card">
+    <button type="button" class="modal-close" onclick="closeForgotModal()">✕</button>
+    <div style="font-size:32px; margin-bottom:12px;">🔑</div>
+    <h3 style="font-size:20px; font-weight:800; margin-bottom:6px;">Reset your password</h3>
+    <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:18px;">
+      Enter the email registered with SpiceStack and we'll send you an instant recovery link.
+    </p>
+    <form onsubmit="handleForgotSubmit(event)">
+      <div class="form-group">
+        <label for="forgotEmail">Email Address</label>
+        <div class="input-wrapper">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="forgotEmail" placeholder="you@example.com" required>
+        </div>
+      </div>
+      <button type="submit" class="submit-btn" style="margin-top:10px;">Send Recovery Link</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= TOAST NOTIFICATION ================= -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // State
+  let currentRole = 'diner'; // 'diner' | 'staff'
+  let currentMode = 'signin'; // 'signin' | 'signup'
+
+  const $ = id => document.getElementById(id);
+
+  function notify(msg, type = 'success') {
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type + ' show';
+    setTimeout(() => {
+      t.className = 'toast';
+    }, 3200);
+  }
+
+  // Switch Role between Diner and Staff
+  function setRole(role) {
+    currentRole = role;
+    $('roleDiner').classList.toggle('active', role === 'diner');
+    $('roleStaff').classList.toggle('active', role === 'staff');
+
+    if (role === 'staff') {
+      // In Staff mode, only Sign In makes sense
+      setMode('signin');
+      $('modeToggle').style.display = 'none';
+      $('socialSection').style.display = 'none';
+      $('staffRoleGroup').style.display = 'block';
+      $('emailLabel').textContent = 'Staff ID or Official Email';
+      $('email').placeholder = 'staff.chef@spicestack.com';
+      $('passwordLabel').textContent = 'Station Access PIN';
+      $('formTitle').textContent = 'Staff Station Login';
+      $('formSub').textContent = 'Authorized personnel access to KDS and Restaurant Management.';
+      $('footerPromptText').textContent = 'Need station access?';
+      $('footerPromptBtn').textContent = 'Contact Floor Manager';
+      $('footerPromptBtn').onclick = () => notify('Please contact your shift supervisor for station credentials.', 'error');
+    } else {
+      $('modeToggle').style.display = 'flex';
+      $('socialSection').style.display = 'block';
+      $('staffRoleGroup').style.display = 'none';
+      $('emailLabel').textContent = 'Email Address';
+      $('email').placeholder = 'you@example.com';
+      $('passwordLabel').textContent = 'Password';
+      $('footerPromptBtn').onclick = toggleAuthMode;
+      updateModeUI();
+    }
+  }
+
+  // Switch Mode between Sign In and Sign Up
+  function setMode(mode) {
+    currentMode = mode;
+    updateModeUI();
+  }
+
+  function toggleAuthMode() {
+    setMode(currentMode === 'signin' ? 'signup' : 'signin');
+  }
+
+  function updateModeUI() {
+    const isSignUp = currentMode === 'signup';
+    $('tabSignIn').classList.toggle('active', !isSignUp);
+    $('tabSignUp').classList.toggle('active', isSignUp);
+
+    $('nameGroup').style.display = isSignUp ? 'block' : 'none';
+    $('phoneGroup').style.display = isSignUp ? 'block' : 'none';
+    $('dietaryGroup').style.display = isSignUp ? 'block' : 'none';
+    $('strengthContainer').style.display = isSignUp ? 'block' : 'none';
+    $('forgotLink').style.display = isSignUp ? 'none' : 'inline-block';
+
+    if (isSignUp) {
+      $('formTitle').textContent = 'Create Diner Account';
+      $('formSub').textContent = 'Join SpiceStack for 1-tap table bookings and order tracking.';
+      $('submitBtnText').textContent = 'Create SpiceStack Account';
+      $('rememberLabel').textContent = 'Receive SMS table updates & dining reminders';
+      $('footerPromptText').textContent = 'Already have an account?';
+      $('footerPromptBtn').textContent = 'Sign In instead';
+    } else {
+      $('formTitle').textContent = 'Welcome back';
+      $('formSub').textContent = 'Access your SpiceStack reservations and pre-orders.';
+      $('submitBtnText').textContent = 'Sign In to SpiceStack';
+      $('rememberLabel').textContent = 'Keep me logged in for 30 days';
+      $('footerPromptText').textContent = "Don't have an account yet?";
+      $('footerPromptBtn').textContent = 'Create an account';
+    }
+  }
+
+  // Password Visibility Toggle
+  function togglePasswordVisibility() {
+    const pass = $('password');
+    const btn = event.target;
+    if (pass.type === 'password') {
+      pass.type = 'text';
+      btn.textContent = 'Hide';
+    } else {
+      pass.type = 'password';
+      btn.textContent = 'Show';
+    }
+  }
+
+  // Dietary preference toggle
+  function togglePref(btn) {
+    document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  // Password strength monitor
+  $('password').addEventListener('input', function(e) {
+    if (currentMode !== 'signup') return;
+    const val = e.target.value;
+    let score = 0;
+    if (val.length >= 6) score++;
+    if (val.length >= 9) score++;
+    if (/[0-9]/.test(val) && /[a-zA-Z]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const bars = [$('bar1'), $('bar2'), $('bar3'), $('bar4')];
+    const colors = ['#cf3d3d', '#d6ad62', '#236b4b', '#174d38'];
+    const texts = [
+      'Too weak — add more characters',
+      'Fair — add numbers or letters',
+      'Good password',
+      'Strong culinary password ✓'
+    ];
+
+    bars.forEach((b, idx) => {
+      b.style.background = idx < score ? colors[score - 1] : 'var(--line)';
+    });
+
+    $('strengthText').textContent = val.length ? texts[Math.max(0, score - 1)] : 'Must contain 6+ characters';
+  });
+
+  // One-Click Demo Quick Fill
+  function quickFill(type) {
+    if (type === 'diner') {
+      setRole('diner');
+      setMode('signin');
+      $('email').value = 'priya.sharma@gmail.com';
+      $('password').value = 'dining1234';
+      notify('Pre-filled: Priya Sharma (Diner Account)');
+    } else if (type === 'kitchen') {
+      setRole('staff');
+      $('staffRoleSelect').value = 'kitchen';
+      $('email').value = 'chef.rajesh@spicestack.com';
+      $('password').value = 'kds-chef-99';
+      notify('Pre-filled: Chef Rajesh (Kitchen Display Station)');
+    } else if (type === 'manager') {
+      setRole('staff');
+      $('staffRoleSelect').value = 'manager';
+      $('email').value = 'manager.ops@spicestack.com';
+      $('password').value = 'admin-tables-88';
+      notify('Pre-filled: Operations Manager (TableTurn Analytics)');
+    }
+  }
+
+  // Form Submission Handler
+  function handleAuthSubmit(e) {
+    e.preventDefault();
+    const email = $('email').value.trim();
+    const password = $('password').value;
+    const name = $('fullName') ? $('fullName').value.trim() : '';
+
+    // Clear previous errors
+    $('emailError').classList.remove('visible');
+    $('passwordError').classList.remove('visible');
+
+    if (!email || !email.includes('@')) {
+      $('emailError').classList.add('visible');
+      $('email').focus();
+      return;
+    }
+
+    if (!password || password.length < 4) {
+      $('passwordError').classList.add('visible');
+      $('password').focus();
+      return;
+    }
+
+    // Determine user role and redirect path
+    let userObj = {
+      email,
+      name: name || (email.split('@')[0].replace('.', ' ').replace(/^./, c => c.toUpperCase())),
+      role: currentRole,
+      station: currentRole === 'staff' ? $('staffRoleSelect').value : 'diner',
+      loginTime: Date.now()
+    };
+
+    // Save session in localStorage so html2.html recognizes it
+    localStorage.setItem('spicestack_user', JSON.stringify(userObj));
+
+    // Disable button & show spinner state
+    $('submitBtn').disabled = true;
+    $('submitBtnText').textContent = 'Authenticating...';
+
+    setTimeout(() => {
+      notify('Welcome to SpiceStack, ' + userObj.name + '!', 'success');
+
+      setTimeout(() => {
+        // Route to the appropriate tab in the main website
+        if (currentRole === 'staff') {
+          const station = $('staffRoleSelect').value;
+          if (station === 'kitchen') {
+            window.location.href = 'html2.html#kitchen';
+          } else {
+            window.location.href = 'html2.html#manager';
+          }
+        } else {
+          // Diner: redirect to home or reservations
+          window.location.href = 'html2.html#book';
+        }
+      }, 900);
+    }, 600);
+  }
+
+  // Social Auth Simulation
+  function handleSocial(provider) {
+    notify('Connecting with ' + provider + '...', 'success');
+    const demoUser = {
+      email: provider.toLowerCase() + '.user@spicestack.com',
+      name: provider + ' Guest',
+      role: 'diner',
+      station: 'diner',
+      provider: provider,
+      loginTime: Date.now()
+    };
+    localStorage.setItem('spicestack_user', JSON.stringify(demoUser));
+    setTimeout(() => {
+      window.location.href = 'html2.html#book';
+    }, 800);
+  }
+
+  // Forgot Password Modal
+  function openForgotModal() {
+    $('forgotModal').classList.add('open');
+    if ($('email').value) {
+      $('forgotEmail').value = $('email').value;
+    }
+  }
+
+  function closeForgotModal() {
+    $('forgotModal').classList.remove('open');
+  }
+
+  function handleForgotSubmit(e) {
+    e.preventDefault();
+    const mail = $('forgotEmail').value.trim();
+    closeForgotModal();
+    notify('Password reset instructions sent to ' + mail, 'success');
+  }
+
+  // Check URL query parameters for pre-selected role/mode
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('role') === 'staff') {
+      setRole('staff');
+    }
+    if (params.get('mode') === 'signup') {
+      setMode('signup');
+    }
+  });
+</script>
+
+</body>
+</html>
