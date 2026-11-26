@@ -1,0 +1,777 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpiceStack | TableTurn</title>
+<style>
+:root{
+  --green:#174d38;--green2:#236b4b;--gold:#d6ad62;
+  --cream:#f7f5ef;--white:#fff;--ink:#202820;
+  --muted:#788078;--line:#e8e5dc;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);
+font-family:Arial,Helvetica,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+header{
+ background:var(--green);color:white;padding:17px 5%;
+ display:flex;justify-content:space-between;align-items:center;
+ flex-wrap:wrap;gap:15px;
+ box-shadow:0 4px 18px rgba(0,0,0,0.08);
+ position:sticky;top:0;z-index:50;
+}
+.brand{font-size:25px;font-weight:bold;color:#f2d18c;transition:transform 0.25s ease;display:inline-block}
+.brand:hover{transform:scale(1.02)}
+.brand small{display:block;font-size:11px;color:white;font-weight:normal;letter-spacing:0.5px}
+nav{display:flex;gap:7px;flex-wrap:wrap}
+nav button{background:transparent;color:white;border:0;
+padding:10px 13px;border-radius:8px;transition:all 0.2s cubic-bezier(0.16,1,0.3,1);position:relative}
+nav button.active,nav button:hover{background:#ffffff25;transform:translateY(-1px)}
+nav button.active::after{
+ content:"";position:absolute;bottom:4px;left:20%;right:20%;height:2px;
+ background:var(--gold);border-radius:2px;animation:navLine 0.25s ease;
+}
+@keyframes navLine{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+main{max-width:1400px;margin:auto;padding:25px}
+.page{display:none;opacity:0}
+.page.active{
+ display:block;
+ animation:pageEntrance 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes pageEntrance{
+ from{opacity:0;transform:translateY(12px)}
+ to{opacity:1;transform:translateY(0)}
+}
+.hero{
+ background:linear-gradient(115deg,#133a2b 0%,#1e523b 50%,#286448 100%);
+ color:white;padding:45px 35px;border-radius:18px;margin-bottom:22px;
+ position:relative;overflow:hidden;
+ box-shadow:0 12px 30px rgba(23,77,56,0.14);
+}
+.hero::after{
+ content:"";position:absolute;top:-40%;right:-20%;width:350px;height:350px;
+ border-radius:50%;
+ background:radial-gradient(circle,rgba(214,173,98,0.18) 0%,transparent 70%);
+ pointer-events:none;
+ animation:heroFloat 9s ease-in-out infinite alternate;
+}
+@keyframes heroFloat{
+ 0%{transform:translate(0,0) scale(1)}
+ 100%{transform:translate(-30px,20px) scale(1.15)}
+}
+.hero h1{font-size:clamp(30px,5vw,48px);margin:0 0 10px;position:relative;z-index:2}
+.hero p{color:#e4ebdf;max-width:650px;position:relative;z-index:2}
+.eyebrow{
+ color:var(--gold);font-size:12px;font-weight:bold;
+ letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;
+ display:inline-flex;align-items:center;gap:6px;position:relative;z-index:2
+}
+.eyebrow::before{
+ content:"";width:6px;height:6px;border-radius:50%;
+ background:var(--gold);box-shadow:0 0 8px var(--gold);
+ animation:pulseDot 2s infinite ease-in-out;
+}
+@keyframes pulseDot{
+ 0%,100%{transform:scale(1);opacity:1}
+ 50%{transform:scale(1.4);opacity:0.5}
+}
+.grid{display:grid;grid-template-columns:1.5fr .8fr;gap:20px}
+.card{background:white;padding:21px;border:1px solid var(--line);
+border-radius:16px;margin-bottom:17px;box-shadow:0 5px 20px #00000008;
+transition:box-shadow 0.25s ease,border-color 0.25s ease}
+.card:hover{box-shadow:0 8px 25px rgba(0,0,0,0.06);border-color:#dedad0}
+h2,h3{margin-top:0}
+h3{font-size:18px}
+label{display:block;font-size:12px;font-weight:bold;
+color:var(--muted);margin-bottom:6px}
+input,select,textarea{
+width:100%;padding:11px;border:1px solid var(--line);
+border-radius:9px;background:#fcfbf8;color:var(--ink);
+transition:border-color 0.2s,box-shadow 0.2s,background-color 0.2s;
+}
+input:focus,select:focus,textarea:focus{
+outline:none;border-color:var(--green);background:white;
+box-shadow:0 0 0 3px rgba(23,77,56,0.1);
+}
+textarea{min-height:70px}
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.btn{border:0;border-radius:9px;background:var(--green2);
+color:white;padding:11px 16px;font-weight:bold;
+transition:all 0.2s cubic-bezier(0.16,1,0.3,1);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover:not(:disabled){background:var(--green);transform:translateY(-1.5px);box-shadow:0 4px 12px rgba(23,77,56,0.2)}
+.btn:active:not(:disabled){transform:translateY(0);box-shadow:none}
+.btn.secondary{background:#eaf1e9;color:var(--green)}
+.btn.secondary:hover:not(:disabled){background:#dfeae0;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+.btn.gold{background:#d6ad62;color:#202820}
+.btn.gold:hover:not(:disabled){background:#c99f52;box-shadow:0 4px 14px rgba(214,173,98,0.4)}
+.btn.small{padding:7px 10px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.slot{border:1px solid var(--line);background:white;padding:11px;
+border-radius:9px;font-weight:bold;transition:all 0.2s cubic-bezier(0.16,1,0.3,1)}
+.slot:hover:not(:disabled):not(.selected){
+ border-color:var(--green2);transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,0.05)
+}
+.slot.selected{background:#e5f1e7;border-color:var(--green);color:var(--green);animation:slotBump 0.22s ease-out}
+@keyframes slotBump{
+ 0%{transform:scale(0.95)}
+ 50%{transform:scale(1.04)}
+ 100%{transform:scale(1)}
+}
+.slot:disabled{opacity:.35;text-decoration:line-through}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.filter{border:1px solid var(--line);background:white;
+padding:8px 13px;border-radius:25px;font-size:12px;
+transition:all 0.2s ease}
+.filter:hover:not(.active){border-color:var(--green);background:#f7fbf8;transform:translateY(-1px)}
+.filter.active{background:var(--green);color:white;box-shadow:0 2px 8px rgba(23,77,56,0.25)}
+.menu{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.dish{border:1px solid var(--line);border-radius:13px;
+overflow:hidden;background:white;
+transition:transform 0.28s cubic-bezier(0.16,1,0.3,1),box-shadow 0.28s cubic-bezier(0.16,1,0.3,1),border-color 0.25s}
+.dish:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,0.08);border-color:rgba(23,77,56,0.3)}
+.dish img{width:100%;height:155px;object-fit:cover;
+background:#eee;display:block;transition:transform 0.4s ease}
+.dish:hover img{transform:scale(1.05)}
+.dish-content{padding:13px}
+.dish h4{margin:0 0 5px}
+.dish p{font-size:12px;color:var(--muted);margin:0 0 8px}
+.tags{font-size:10px;color:var(--green);margin-bottom:10px}
+.dish-bottom{display:flex;justify-content:space-between;align-items:center}
+.price{font-weight:bold;color:var(--green)}
+.cartline{display:flex;justify-content:space-between;gap:8px;
+padding:11px 0;border-bottom:1px solid var(--line);font-size:13px;
+animation:cartSlide 0.2s ease}
+@keyframes cartSlide{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.qty{display:flex;align-items:center;gap:7px}
+.qty button{border:0;background:#eaf1e9;color:var(--green);
+width:24px;height:24px;border-radius:6px;font-weight:bold;transition:transform 0.15s,background-color 0.15s}
+.qty button:hover{background:#dbe8db;transform:scale(1.1)}
+.qty button:active{transform:scale(0.95)}
+.total{display:flex;justify-content:space-between;margin:10px 0;font-size:13px}
+.total.final{font-size:18px;font-weight:bold;border-top:1px solid var(--line);padding-top:12px}
+.pill{background:#eff2ec;border-radius:20px;padding:5px 9px;
+font-size:11px;color:var(--green);transition:all 0.2s}
+.pill.bump{animation:pillBump 0.28s ease}
+@keyframes pillBump{
+ 0%{transform:scale(1)}
+ 50%{transform:scale(1.2);background:var(--green);color:white}
+ 100%{transform:scale(1)}
+}
+.booking{background:#f2f8f1;border:1px dashed #7a9c7c;
+padding:15px;border-radius:12px;margin-top:15px;
+animation:bookingPop 0.35s cubic-bezier(0.16,1,0.3,1)}
+@keyframes bookingPop{
+ from{opacity:0;transform:scale(0.95) translateY(8px)}
+ to{opacity:1;transform:scale(1) translateY(0)}
+}
+.code{font-size:23px;font-weight:bold;color:var(--green);letter-spacing:2px}
+.reservation{padding:14px;border:1px solid var(--line);
+border-radius:12px;margin:10px 0;background:white;
+transition:transform 0.2s,box-shadow 0.2s}
+.reservation:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.05)}
+.status{font-size:11px;border-radius:20px;padding:5px 9px;
+background:#fff0d6;color:#98601f;font-weight:bold;display:inline-block}
+.status.cooking{background:#e4f1e6;color:#286c43;animation:statusPulse 2s infinite}
+.status.ready{background:#e5effb;color:#346c9c;animation:statusPulse 2s infinite}
+.status.arrived{background:#e8f1e8;color:#236b4b}
+@keyframes statusPulse{
+ 0%,100%{box-shadow:0 0 0 0 rgba(40,108,67,0.3)}
+ 50%{box-shadow:0 0 0 5px rgba(40,108,67,0)}
+}
+.kds{background:#17201b;color:white;padding:20px;border-radius:15px}
+.tickets{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ticket{background:#28332c;border:1px solid #455348;
+border-top:5px solid #e8b653;border-radius:12px;padding:14px;
+transition:transform 0.25s,box-shadow 0.25s}
+.ticket:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.35)}
+.ticket.cooking{border-top-color:#65bd7e;box-shadow:0 0 12px rgba(101,189,126,0.15)}
+.ticket.ready{border-top-color:#66a9e7;box-shadow:0 0 12px rgba(102,169,231,0.18)}
+.ticket h3{margin:8px 0}
+.ticket p{font-size:12px;color:#c8d1c8}
+.ticket .btn{margin:4px 2px 0 0}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.metric{background:white;padding:18px;border:1px solid var(--line);border-radius:12px;
+transition:transform 0.25s ease,box-shadow 0.25s ease}
+.metric:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.06)}
+.metric small{color:var(--muted)}
+.metric strong{display:block;font-size:26px;margin-top:8px}
+.tables{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.tablebox{background:white;border:1px solid var(--line);
+border-radius:11px;padding:14px;transition:transform 0.2s,box-shadow 0.2s}
+.tablebox:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,0.05)}
+.tablebox.busy{background:#fff4e4;border-color:#e8c998}
+.bar{height:7px;background:#eee;border-radius:8px;margin-top:10px;overflow:hidden}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--green2));
+border-radius:8px;transition:width 0.6s cubic-bezier(0.16,1,0.3,1)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.muted{color:var(--muted);font-size:12px}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.toast{position:fixed;bottom:20px;right:20px;background:#202820;
+color:white;padding:13px 18px;border-radius:10px;z-index:100;
+transform:translateY(20px);opacity:0;pointer-events:none;
+transition:transform 0.3s cubic-bezier(0.16,1,0.3,1),opacity 0.3s ease}
+.toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+@media(max-width:850px){
+ .grid{grid-template-columns:1fr}.tickets{grid-template-columns:repeat(2,1fr)}
+ .metrics{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:550px){
+ main{padding:12px}.fields{grid-template-columns:1fr}
+ .menu{grid-template-columns:1fr}.tickets{grid-template-columns:1fr}
+ .slots{grid-template-columns:repeat(3,1fr)}
+ .tables{grid-template-columns:repeat(2,1fr)}
+ header{padding:14px}.metrics{gap:7px}
+ .hero{padding:27px 20px}
+}
+</style>
+
+</head>
+<body>
+
+<header>
+ <div class="brand">✦ SpiceStack
+  <small>Dine · Pre-Order · Enjoy</small>
+ </div>
+ <nav>
+  <button class="active" data-page="home">Home</button>
+  <button data-page="book">Reservations</button>
+  <button data-page="orders">My Orders</button>
+  <button data-page="kitchen">Kitchen KDS</button>
+  <button data-page="manager">Analytics</button>
+ </nav>
+ <div class="user-nav" id="userNav">
+  <a href="login.html" class="btn small gold" style="text-decoration:none">Sign In →</a>
+ </div>
+</header>
+
+<main>
+<section id="home" class="page active">
+ <div class="hero">
+  <div class="eyebrow">Welcome to SpiceStack</div>
+  <h1>Your table, ready when you arrive.</h1>
+  <p>Reserve your table, pre-order your favourite food and let our kitchen prepare your meal at the perfect time.</p>
+  <button class="btn gold" onclick="go('book')">Reserve a table →</button>
+ </div>
+ <div class="metrics">
+  <div class="metric"><small>Restaurant tables</small><strong>08</strong></div>
+  <div class="metric"><small>Menu favourites</small><strong>25</strong></div>
+  <div class="metric"><small>Dining duration</small><strong>90 min</strong></div>
+  <div class="metric"><small>Pre-order service</small><strong>Live</strong></div>
+ </div>
+ <div class="card" style="margin-top:18px">
+  <h2>How TableTurn works</h2>
+  <div class="two">
+   <p>① Choose your table and dining time.</p>
+   <p>② Select dishes and pre-order.</p>
+   <p>③ Kitchen receives your timed ticket.</p>
+   <p>④ Arrive and enjoy your meal.</p>
+  </div>
+ </div>
+</section>
+
+<section id="book" class="page">
+ <div class="hero">
+  <div class="eyebrow">Guest reservation</div>
+  <h1>Book your dining experience.</h1>
+  <p>Choose your slot and pre-order your meal before arriving.</p>
+ </div>
+ <div class="grid">
+  <div>
+   <div class="card">
+    <h3>01 / Reserve your table</h3>
+    <div class="fields">
+     <div><label>Your name</label><input id="guest" placeholder="Enter your name"></div>
+     <div><label>Party size</label><select id="party">
+      <option>1</option><option selected>2</option><option>3</option>
+      <option>4</option><option>5</option><option>6</option>
+     </select></div>
+     <div><label>Dining date</label><input id="date" type="date"></div>
+    </div>
+    <div style="margin-top:13px">
+     <label>Available time slots · 90 minutes</label>
+     <div class="slots" id="slots"></div>
+    </div>
+   </div>
+
+   <div class="card">
+    <h3>02 / Explore our menu</h3>
+    <input id="search" placeholder="Search dishes..." oninput="renderMenu()">
+    <div class="filters" id="filters"></div>
+    <div class="menu" id="menu"></div>
+   </div>
+  </div>
+
+  <aside>
+   <div class="card">
+    <h3>Your pre-order <span class="pill" id="count">0 items</span></h3>
+    <div id="cart"><p class="muted">Your cart is empty.</p></div>
+    <hr>
+    <label>Allergy and customization notes</label>
+    <textarea id="notes" placeholder="No peanuts, less spicy, etc."></textarea>
+    <div class="total"><span>Subtotal</span><strong id="subtotal">₹0</strong></div>
+    <div class="total"><span>GST (5%)</span><strong id="gst">₹0</strong></div>
+    <div class="total"><span>Service charge (5%)</span><strong id="service">₹0</strong></div>
+    <div class="total final"><span>Total</span><strong id="grand">₹0</strong></div>
+    <button class="btn" style="width:100%" id="bookBtn" onclick="createBooking()">Confirm reservation</button>
+    <div id="confirmation"></div>
+   </div>
+  </aside>
+ </div>
+</section>
+
+<section id="orders" class="page">
+ <div class="hero">
+  <div class="eyebrow">Guest portal</div>
+  <h1>My reservations</h1>
+  <p>View your booking pass and food preparation status.</p>
+ </div>
+ <div class="card">
+  <h3>Your bookings</h3>
+  <div id="reservationList"></div>
+ </div>
+</section>
+
+<section id="kitchen" class="page">
+ <div class="hero">
+  <div class="eyebrow">Back of house</div>
+  <h1>Kitchen Display System</h1>
+  <p>Prioritized tickets synchronized with guest arrival times.</p>
+ </div>
+ <div class="kds">
+  <h2>Live Kitchen Queue</h2>
+  <p style="color:#b8c8ba">Yellow: Pending · Green: Cooking · Blue: Ready</p>
+  <div class="tickets" id="tickets"></div>
+ </div>
+</section>
+
+<section id="manager" class="page">
+ <div class="hero">
+  <div class="eyebrow">Restaurant operations</div>
+  <h1>Turnaround analytics</h1>
+  <p>Monitor table occupancy, reservations and dining duration.</p>
+ </div>
+ <div class="metrics" id="managerMetrics"></div>
+ <div class="grid" style="margin-top:18px">
+  <div class="card">
+   <h3>Table occupancy</h3>
+   <div class="tables" id="tableGrid"></div>
+  </div>
+  <div class="card">
+   <h3>Table turn time estimator</h3>
+   <div id="estimator"></div>
+   <hr>
+   <h3>Split bill calculator</h3>
+   <label>Choose reservation</label>
+   <select id="splitBooking" onchange="renderSplit()"></select>
+   <label style="margin-top:10px">Split method</label>
+   <select id="splitMethod" onchange="renderSplit()">
+    <option value="equal">Split equally</option>
+    <option value="items">Split by ordered items</option>
+   </select>
+   <div id="splitResult"></div>
+  </div>
+ </div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------------- MENU DATA ----------------
+const dishes=[
+{id:1,name:"Butter Chicken",cat:"North Indian",price:320,prep:20,tag:"Non-Veg",photo:"https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600"},
+{id:2,name:"Chicken Biryani",cat:"Biryani",price:280,prep:20,tag:"Non-Veg",photo:"https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=600"},
+{id:3,name:"Paneer Tikka",cat:"Starters",price:220,prep:15,tag:"Veg",photo:"https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=600"},
+{id:4,name:"Veg Biryani",cat:"Biryani",price:220,prep:18,tag:"Veg",photo:"https://images.unsplash.com/photo-1596797038530-2c107229654b?w=600"},
+{id:5,name:"Dal Makhani",cat:"North Indian",price:190,prep:15,tag:"Veg",photo:"https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600"},
+{id:6,name:"Garlic Naan",cat:"Breads",price:55,prep:10,tag:"Veg",photo:"https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600"},
+{id:7,name:"Chicken Tikka",cat:"Starters",price:260,prep:18,tag:"Non-Veg",photo:"https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600"},
+{id:8,name:"Masala Dosa",cat:"South Indian",price:150,prep:12,tag:"Veg",photo:"https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=600"},
+{id:9,name:"Margherita Pizza",cat:"Continental",price:260,prep:15,tag:"Veg",photo:"https://images.unsplash.com/photo-1579751626657-72bc17010498?w=600"},
+{id:10,name:"Alfredo Pasta",cat:"Continental",price:280,prep:18,tag:"Veg",photo:"https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=600"},
+{id:11,name:"Grilled Chicken",cat:"Continental",price:340,prep:22,tag:"Non-Veg",photo:"https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=600"},
+{id:12,name:"Caesar Salad",cat:"Continental",price:190,prep:10,tag:"Veg",photo:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600"},
+{id:13,name:"Chilli Paneer",cat:"Starters",price:210,prep:15,tag:"Veg",photo:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600"},
+{id:14,name:"Hara Bhara Kebab",cat:"Starters",price:180,prep:14,tag:"Veg",photo:"https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?w=600"},
+{id:15,name:"Fish Curry",cat:"Seafood",price:310,prep:22,tag:"Non-Veg",photo:"https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=600"},
+{id:16,name:"Prawn Masala",cat:"Seafood",price:360,prep:25,tag:"Non-Veg",photo:"https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?w=600"},
+{id:17,name:"Mushroom Soup",cat:"Soups",price:130,prep:10,tag:"Veg",photo:"https://images.unsplash.com/photo-1547592180-85f173990554?w=600"},
+{id:18,name:"Tomato Soup",cat:"Soups",price:110,prep:10,tag:"Veg",photo:"https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600"},
+{id:19,name:"Tandoori Roti",cat:"Breads",price:35,prep:10,tag:"Veg",photo:"https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600"},
+{id:20,name:"Gulab Jamun",cat:"Desserts",price:90,prep:10,tag:"Veg",photo:"https://images.unsplash.com/photo-1666190092159-3b8d0c6c6e1b?w=600"},
+{id:21,name:"Brownie with Ice Cream",cat:"Desserts",price:160,prep:15,tag:"Veg",photo:"https://images.unsplash.com/photo-1564355808539-22fda35bed7e?w=600"},
+{id:22,name:"Fresh Lime Soda",cat:"Drinks",price:80,prep:5,tag:"Veg",photo:"https://images.unsplash.com/photo-1513558161293-cdaf765edfd4?w=600"},
+{id:23,name:"Mango Lassi",cat:"Drinks",price:100,prep:5,tag:"Veg",photo:"https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=600"},
+{id:24,name:"Club Sandwich",cat:"Continental",price:210,prep:15,tag:"Veg",photo:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600"},
+{id:25,name:"Egg Fried Rice",cat:"Asian",price:230,prep:15,tag:"Non-Veg",photo:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600"}
+];
+
+const tables=[
+{id:1,cap:2},{id:2,cap:2},{id:3,cap:4},{id:4,cap:4},
+{id:5,cap:4},{id:6,cap:6},{id:7,cap:6},{id:8,cap:6}
+];
+const times=["18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30"];
+let category="All",cart={};
+let selectedTime="19:30";
+let bookings=JSON.parse(localStorage.getItem("spicestack_bookings")||"[]");
+
+const $=id=>document.getElementById(id);
+const money=n=>"₹"+Number(n).toFixed(2);
+const dish=id=>dishes.find(d=>d.id===Number(id));
+const today=()=>new Date().toISOString().slice(0,10);
+
+$("date").value=today();
+$("date").min=today();
+
+function save(){
+ localStorage.setItem("spicestack_bookings",JSON.stringify(bookings));
+}
+function notify(message){
+ $("toast").textContent=message;
+ $("toast").classList.add("show");
+ setTimeout(()=>$("toast").classList.remove("show"),2600);
+}
+function go(id){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
+ $(id).classList.add("active");
+ if(id==="orders")renderReservations();
+ if(id==="kitchen")renderKDS();
+ if(id==="manager")renderManager();
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>go(b.dataset.page));
+
+// ---------------- TABLE AVAILABILITY ----------------
+function minutes(t){
+ const [h,m]=t.split(":").map(Number);
+ return h*60+m;
+}
+function overlaps(a,b){
+ return minutes(a)<minutes(b)+90 && minutes(b)<minutes(a)+90;
+}
+function availableTables(date,time,party){
+ return tables.filter(t=>t.cap>=party &&
+ !bookings.some(b=>b.date===date && b.table===t.id &&
+ b.status!=="completed" && overlaps(b.time,time)));
+}
+function renderSlots(){
+ const date=$("date").value,party=Number($("party").value);
+ $("slots").innerHTML=times.map(t=>{
+  const available=availableTables(date,t,party).length>0;
+  return `<button class="slot ${selectedTime===t?"selected":""}"
+  ${available?"":"disabled"} onclick="chooseTime('${t}')">
+  ${t}<small style="display:block">${available?"Available":"Full"}</small></button>`;
+ }).join("");
+}
+function chooseTime(t){
+ selectedTime=t;
+ renderSlots();
+}
+$("party").onchange=renderSlots;
+$("date").onchange=renderSlots;
+
+// ---------------- MENU ----------------
+function renderFilters(){
+ const cats=["All",...new Set(dishes.map(d=>d.cat))];
+ $("filters").innerHTML=cats.map(c=>
+ `<button class="filter ${category===c?"active":""}"
+ onclick="setCategory('${c}')">${c}</button>`).join("");
+}
+function setCategory(c){
+ category=c;renderFilters();renderMenu();
+}
+function renderMenu(){
+ const search=$("search").value.toLowerCase();
+ const list=dishes.filter(d=>
+ (category==="All"||d.cat===category)&&
+ d.name.toLowerCase().includes(search));
+ $("menu").innerHTML=list.map(d=>`
+ <article class="dish">
+  <img src="${d.photo}" alt="${d.name}"
+   loading="lazy" onerror="this.style.display='none'">
+  <div class="dish-content">
+   <h4>${d.name}</h4>
+   <p>${d.prep} min preparation · ${d.cat}</p>
+   <div class="tags">${d.tag} ${d.tag==="Non-Veg"?"· Spicy option available":""}</div>
+   <div class="dish-bottom">
+    <span class="price">${money(d.price)}</span>
+    <button class="btn small" onclick="addCart(${d.id})">+ Add</button>
+   </div>
+  </div>
+ </article>`).join("");
+}
+function addCart(id){
+ cart[id]=(cart[id]||0)+1;
+ renderCart();
+}
+function changeQty(id,n){
+ cart[id]=(cart[id]||0)+n;
+ if(cart[id]<=0)delete cart[id];
+ renderCart();
+}
+function totals(){
+ let sub=Object.entries(cart).reduce((s,[id,q])=>s+dish(id).price*q,0);
+ return {sub,gst:sub*.05,service:sub*.05,grand:sub*1.10};
+}
+function renderCart(){
+ const entries=Object.entries(cart);
+ const count=entries.reduce((s,[id,q])=>s+q,0);
+ $("count").textContent=count+" items";
+ $("count").classList.remove("bump");
+ void $("count").offsetWidth;
+ $("count").classList.add("bump");
+ $("cart").innerHTML=count?entries.map(([id,q])=>`
+ <div class="cartline">
+ <div><strong>${dish(id).name}</strong><br>${money(dish(id).price)}</div>
+ <div class="qty">
+ <button onclick="changeQty(${id},-1)">−</button>${q}
+ <button onclick="changeQty(${id},1)">+</button>
+ </div></div>`).join(""):'<p class="muted">Your cart is empty.</p>';
+ const t=totals();
+ $("subtotal").textContent=money(t.sub);
+ $("gst").textContent=money(t.gst);
+ $("service").textContent=money(t.service);
+ $("grand").textContent=money(t.grand);
+ $("bookBtn").disabled=count===0;
+}
+
+// ---------------- CREATE RESERVATION ----------------
+function createBooking(){
+ const name=$("guest").value.trim();
+ const date=$("date").value;
+ const party=Number($("party").value);
+ if(!name){notify("Please enter your name.");return;}
+ if(!date||date<today()){notify("Select a valid date.");return;}
+ if(!Object.keys(cart).length){notify("Please add dishes to your cart.");return;}
+ const available=availableTables(date,selectedTime,party);
+ if(!available.length){notify("This slot is full. Choose another.");renderSlots();return;}
+ const table=available.sort((a,b)=>a.cap-b.cap)[0];
+ const items=Object.entries(cart).map(([id,qty])=>({id:Number(id),qty}));
+ const id="SS-"+Math.random().toString(36).slice(2,8).toUpperCase();
+ const total=totals().grand;
+ const booking={
+  id,name,party,date,time:selectedTime,table:table.id,
+  items,notes:$("notes").value,status:"pending",
+  total,created:Date.now(),duration:90
+ };
+ bookings.push(booking);save();
+
+ $("confirmation").innerHTML=`
+ <div class="booking">
+ <div class="eyebrow">Booking confirmed</div>
+ <div class="code">${id}</div>
+ <p>Table ${table.id} · ${date} · ${selectedTime}</p>
+ <p>${party} guests · ${money(total)}</p>
+ <img style="width:120px;height:120px;object-fit:contain"
+ src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(id)}"
+ alt="Booking QR code">
+ <p class="muted">Show this booking ID at the restaurant.</p>
+ <button class="btn small" onclick="calendarLink('${id}')">Add to Google Calendar</button>
+ <button class="btn secondary small" onclick="simulateSMS('${id}')">Simulate SMS</button>
+ </div>`;
+ cart={};renderCart();renderSlots();
+ renderKDS();notify("Your reservation is confirmed!");
+}
+function calendarLink(id){
+ const b=bookings.find(x=>x.id===id);if(!b)return;
+ const start=b.date.replaceAll("-","")+ "T"+b.time.replace(":","")+"00";
+ const endDate=new Date(b.date+"T"+b.time+":00");
+ endDate.setMinutes(endDate.getMinutes()+90);
+ const end=endDate.getFullYear()+String(endDate.getMonth()+1).padStart(2,"0")+
+ String(endDate.getDate()).padStart(2,"0")+"T"+
+ String(endDate.getHours()).padStart(2,"0")+
+ String(endDate.getMinutes()).padStart(2,"0")+"00";
+ const url="https://calendar.google.com/calendar/render?action=TEMPLATE"+
+ "&text="+encodeURIComponent("SpiceStack Reservation "+id)+
+ "&dates="+start+"/"+end+
+ "&details="+encodeURIComponent("Table "+b.table+" at SpiceStack");
+ window.open(url,"_blank");
+}
+function simulateSMS(id){
+ const b=bookings.find(x=>x.id===id);
+ if(!b)return;
+ alert("SMS SIMULATION\n\nHello "+b.name+
+ ", your SpiceStack reservation "+b.id+
+ " is confirmed for "+b.time+". Table "+b.table+
+ ". Thank you!");
+}
+
+// ---------------- CUSTOMER RESERVATIONS ----------------
+function statusClass(s){
+ return s==="cooking"?"cooking":s==="ready"?"ready":s==="arrived"?"arrived":"";
+}
+function statusText(s){
+ return ({pending:"Pending",cooking:"Cooking",ready:"Ready",arrived:"Guest arrived",completed:"Completed"})[s]||s;
+}
+function renderReservations(){
+ $("reservationList").innerHTML=bookings.length?
+ [...bookings].reverse().map(b=>`
+ <div class="reservation">
+ <div style="display:flex;justify-content:space-between;gap:10px">
+ <strong>${b.id}</strong>
+ <span class="status ${statusClass(b.status)}">${statusText(b.status)}</span>
+ </div>
+ <p class="muted">${b.date} · ${b.time} · Table ${b.table} · ${b.party} guests</p>
+ <p>${b.items.map(x=>dish(x.id).name+" × "+x.qty).join(", ")}</p>
+ <strong>${money(b.total)}</strong>
+ <p class="muted">${b.status==="cooking"?"Food is being prepared for your arrival!":b.status==="ready"?"Your food is ready!":"Order status: "+statusText(b.status)}</p>
+ </div>`).join(""):'<p>No reservations yet.</p>';
+}
+
+// ---------------- KITCHEN DISPLAY ----------------
+function prepTime(b){
+ return Math.max(0,...b.items.map(x=>dish(x.id).prep));
+}
+function targetPrep(b){
+ return minutes(b.time)-prepTime(b);
+}
+function renderKDS(){
+ const active=bookings.filter(b=>b.status!=="completed")
+ .sort((a,b)=>targetPrep(a)-targetPrep(b));
+ $("tickets").innerHTML=active.length?active.map(b=>{
+ const target=targetPrep(b);
+ const targetText=String(Math.floor(target/60)).padStart(2,"0")+":"+
+ String(target%60).padStart(2,"0");
+ return `<article class="ticket ${b.status}">
+ <strong style="color:#f2c56d">${b.status==="pending"?"PENDING · FIRE AT "+targetText:statusText(b.status).toUpperCase()}</strong>
+ <h3>Table ${b.table} · ${b.id}</h3>
+ <p>${b.name} · Arrival ${b.time} · ${b.party} guests</p>
+ ${b.items.map(x=>`<p>${x.qty} × ${dish(x.id).name} (${dish(x.id).prep} min)</p>`).join("")}
+ ${b.notes?`<p style="color:#f4ca80">Note: ${b.notes}</p>`:""}
+ <p>Target prep time: ${targetText}</p>
+ <button class="btn small" onclick="checkIn('${b.id}')">Guest arrived</button>
+ ${b.status==="pending"?`<button class="btn small" onclick="setStatus('${b.id}','cooking')">Start cooking</button>`:""}
+ ${b.status==="cooking"?`<button class="btn small" onclick="setStatus('${b.id}','ready')">Ready</button>`:""}
+ ${b.status==="ready"||b.status==="arrived"?`<button class="btn small" onclick="setStatus('${b.id}','completed')">Complete</button>`:""}
+ </article>`;
+ }).join(""):'<p>No active tickets.</p>';
+}
+function checkIn(id){
+ const b=bookings.find(x=>x.id===id);
+ if(!b)return;
+ b.status="arrived";b.priority=true;
+ save();renderKDS();renderReservations();
+ notify("Guest checked in! Ticket promoted to priority.");
+}
+function setStatus(id,status){
+ const b=bookings.find(x=>x.id===id);
+ if(!b)return;
+ b.status=status;
+ if(status==="completed"){
+  b.actualDuration=90;
+  b.completedAt=Date.now();
+ }
+ save();renderKDS();renderReservations();renderManager();
+ notify("Kitchen ticket updated.");
+}
+
+// ---------------- MANAGER ANALYTICS ----------------
+function renderManager(){
+ const active=bookings.filter(b=>b.status!=="completed");
+ const occupied=new Set(active.map(b=>b.table)).size;
+ const completed=bookings.filter(b=>b.status==="completed");
+ const avg=completed.length?
+ completed.reduce((s,b)=>s+(b.actualDuration||90),0)/completed.length:90;
+ const occupancy=Math.round(occupied/8*100);
+ $("managerMetrics").innerHTML=`
+ <div class="metric"><small>Occupied tables</small><strong>${occupied}/8</strong></div>
+ <div class="metric"><small>Occupancy rate</small><strong>${occupancy}%</strong></div>
+ <div class="metric"><small>Average dining duration</small><strong>${Math.round(avg)} min</strong></div>
+ <div class="metric"><small>Active bookings</small><strong>${active.length}</strong></div>`;
+ $("tableGrid").innerHTML=tables.map(t=>{
+ const b=active.find(x=>x.table===t.id);
+ return `<div class="tablebox ${b?"busy":""}">
+ <strong>Table ${t.id}</strong>
+ <p class="muted">${t.cap}-top</p>
+ <small>${b?"Reserved "+b.time:"Available"}</small>
+ <div class="bar"><span style="width:${b?100:0}%"></span></div>
+ </div>`;
+ }).join("");
+ $("estimator").innerHTML=tables.map(t=>{
+ const b=active.find(x=>x.table===t.id);
+ let estimate="Available now";
+ if(b){
+  const end=minutes(b.time)+90;
+  estimate="Estimated vacancy "+String(Math.floor(end/60)).padStart(2,"0")+":"+
+  String(end%60).padStart(2,"0");
+ }
+ return `<div class="total"><span>Table ${t.id}</span><strong>${estimate}</strong></div>`;
+ }).join("");
+ $("splitBooking").innerHTML=bookings.map(b=>
+ `<option value="${b.id}">${b.id} · Table ${b.table}</option>`).join("");
+ renderSplit();
+}
+
+// ---------------- SPLIT BILL ----------------
+function renderSplit(){
+ const id=$("splitBooking").value;
+ const b=bookings.find(x=>x.id===id);
+ if(!b){$("splitResult").innerHTML="<p class='muted'>No booking selected.</p>";return;}
+ const method=$("splitMethod").value;
+ if(method==="equal"){
+  const each=b.total/b.party;
+  $("splitResult").innerHTML=`<hr><p>Party size: ${b.party}</p>
+  <strong>${money(each)} per person</strong>`;
+ }else{
+  const count=b.items.reduce((s,x)=>s+x.qty,0);
+  const base=b.total/count;
+  $("splitResult").innerHTML="<hr>"+b.items.map(x=>
+  `<div class="total"><span>${dish(x.id).name} × ${x.qty}</span>
+  <strong>${money(base*x.qty)}</strong></div>`).join("")+
+  `<p class="muted">Item-based split shown before individual guest assignment.</p>`;
+ }
+}
+
+// ---------------- AUTHENTICATION & SESSION ----------------
+function checkAuthUser(){
+ const user=JSON.parse(localStorage.getItem("spicestack_user")||"null");
+ const nav=$("userNav");
+ if(!nav)return;
+ if(user){
+  nav.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
+   <span style="font-size:12px;color:#f2d18c;font-weight:bold" title="${user.email}">👤 ${user.name||user.email}</span>
+   <button class="btn secondary small" onclick="logoutUser()" style="padding:4px 8px;font-size:11px">Logout</button>
+  </div>`;
+  if($("guest")&&!$("guest").value&&user.name){
+   $("guest").value=user.name;
+  }
+ }else{
+  nav.innerHTML=`<a href="login.html" class="btn small gold" style="text-decoration:none">Sign In →</a>`;
+ }
+}
+function logoutUser(){
+ localStorage.removeItem("spicestack_user");
+ notify("Signed out successfully.");
+ checkAuthUser();
+}
+
+// ---------------- START APP ----------------
+function refreshAll(){
+ renderFilters();renderMenu();renderSlots();renderCart();
+ renderReservations();renderKDS();renderManager();
+ checkAuthUser();
+}
+refreshAll();
+
+// Check hash route on load and on hashchange
+function applyHash(){
+ if(window.location.hash){
+  const h=window.location.hash.slice(1);
+  if($(h))go(h);
+ }
+}
+applyHash();
+window.addEventListener("hashchange",applyHash);
+
+// Demo KDS refresh across tabs/windows using localStorage events
+window.addEventListener("storage",e=>{
+ if(e.key==="spicestack_bookings"){
+  bookings=JSON.parse(e.newValue||"[]");refreshAll();
+ }
+});
+</script>
+</body>
+</html>
